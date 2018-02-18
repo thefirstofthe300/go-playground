@@ -106,6 +106,10 @@ func main() {
 		fmt.Errorf("unable to pop bubble: %s", err)
 	}
 
+	seed := int64(time.Now().UnixNano())
+
+	board = gravitate(board, seed)
+
 	printBoard(board)
 }
 
@@ -125,61 +129,53 @@ func popBubble(board Board, x, y int) (Board, error) {
 		}
 		board[[2]int{x, y}] = "X"
 	}
-	gravitate(board)
 	return board, nil
 }
 
-func gravitate(b Board) Board {
+func gravitate(b Board, s int64) Board {
 	boardSize := int(math.Sqrt(float64(len(b))))
 	toFall := 0
 
 	for x := 0; x < boardSize; x++ {
 		for y := 0; y < boardSize; y++ {
-			fmt.Println("Begin loop...")
-			fmt.Println("coordinates:", x, y)
-			printBoard(b)
+			// start counting how far the end bubbles will need to fall
 			if b[[2]int{x, y}] == "X" {
 				toFall++
-				fmt.Println("incrementing toFall", toFall)
 			}
+			// have existing bubbles fall past all popped bubbles
 			if b[[2]int{x, y}] != "X" {
-				fmt.Println("toFall equals", toFall)
-				fmt.Println("swapping places:", b[[2]int{x, y}], "for", b[[2]int{x, y - toFall}])
 				b[[2]int{x, y}], b[[2]int{x, y - toFall}] = b[[2]int{x, y - toFall}], b[[2]int{x, y}]
 			}
+			// If we have reached the top row of the board, we need to start pushing bubbles down
 			if y+1 == boardSize {
-				for toFall >= 0 {
-					b[[2]int{x, y - toFall}] = genBubble()
+				for toFall > 0 || b[[2]int{x, y}] == "X" {
+					b[[2]int{x, y - toFall}] = genBubble(s)
 					toFall--
 				}
+				toFall = 0
 			}
-			printBoard(b)
-			fmt.Println("coordinates:", x, y)
-			fmt.Println("To fall:", toFall)
-			fmt.Println("End loop...")
 		}
-		toFall = 0
 	}
 	return b
 }
 
-func genBubble() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+func genBubble(s int64) string {
+	source := rand.NewSource(s)
+	r := rand.New(source)
 	seed := r.Intn(2)
 	if seed == 1 {
-		fmt.Println("generated a P")
 		return "P"
 	}
-	fmt.Println("generated an O")
 	return "O"
 }
 
 func printBoard(b Board) {
 	boardSize := int(math.Sqrt(float64(len(b))))
-	for y := 0; y < boardSize; y++ {
+	for y := boardSize - 1; y > -1; y-- {
 		for x := 0; x < boardSize; x++ {
-			fmt.Printf("%s", b[[2]int{boardSize - x - 1, y}])
+			fmt.Printf("%s", b[[2]int{x, y}])
 		}
 		fmt.Printf("\n")
 	}
+	fmt.Printf("\n")
 }
