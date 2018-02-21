@@ -17,6 +17,9 @@ func TestDegrade(t *testing.T) {
 		{
 			"renaissance", 1, 5, "rsianesance",
 		},
+		{
+			"Awesome!", 6, 3, "wA!eomse",
+		},
 	}
 
 	for _, tc := range tt {
