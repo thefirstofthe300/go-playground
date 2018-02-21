@@ -86,13 +86,13 @@ func main() {
 
 	board := Board{
 		[2]int{0, 0}: "P",
-		[2]int{0, 1}: "P",
-		[2]int{0, 2}: "O",
-		[2]int{1, 0}: "O",
+		[2]int{0, 1}: "O",
+		[2]int{0, 2}: "P",
+		[2]int{1, 0}: "P",
 		[2]int{1, 1}: "O",
-		[2]int{1, 2}: "P",
-		[2]int{2, 0}: "P",
-		[2]int{2, 1}: "O",
+		[2]int{1, 2}: "O",
+		[2]int{2, 0}: "O",
+		[2]int{2, 1}: "P",
 		[2]int{2, 2}: "P",
 	}
 
@@ -147,9 +147,9 @@ func gravitate(b Board, s int64) Board {
 				b[[2]int{x, y}], b[[2]int{x, y - toFall}] = b[[2]int{x, y - toFall}], b[[2]int{x, y}]
 			}
 			// If we have reached the top row of the board, we need to start pushing bubbles down
-			if y+1 == boardSize {
-				for toFall > 0 || b[[2]int{x, y}] == "X" {
-					b[[2]int{x, y - toFall}] = genBubble(s)
+			if y+1 == boardSize && b[[2]int{x, y}] == "X" {
+				for toFall > 0 {
+					b[[2]int{x, y - toFall + 1}] = genBubble(s)
 					toFall--
 				}
 				toFall = 0
