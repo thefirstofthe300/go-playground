@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	var dinos dino.Dinos
 	f1, err := os.Open("file1.csv")
 	if err != nil {
 		log.Fatalf("Unable to open file1.csv: %s", err)
