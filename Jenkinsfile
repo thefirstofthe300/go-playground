@@ -1,25 +1,15 @@
 pipeline {
-    agent any
-  
-    tools {
-        go 'Go 1.8'
-    }
-    stages {
-        stage ('Initialize') {
-            steps {
-                sh '''
-                    echo "PATH = ${PATH}"
-                    echo "GOROOT = ${GOROOT}"
-                    printenv
-                ''' 
-            }
-        }
-        stage('Run tests') {
-            steps {
-                sh '''#! /bin/bash
+  agent any
+  stages {
+    stage('Run tests') {
+      steps {
+        sh '''#! /bin/bash
 
 go test ./...'''
-            }
-        }
+      }
     }
+  }
+  tools {
+    go 'Go 1.8'
+  }
 }
