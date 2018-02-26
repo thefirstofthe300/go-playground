@@ -3,16 +3,17 @@ package dino
 import (
 	"encoding/csv"
 	"fmt"
+	"log"
 	"math"
 	"os"
 	"strconv"
 )
 
 // Dinos is a map used to make ingesting data easy.
-type Dinos map[string]Dino
+type Dinos map[string]*Dino
 
 // Speeds is an array used to easily sort the dinos by speed.
-type Speeds []Dino
+type Speeds []*Dino
 
 // NewSpeeds creates a new DinoSpeeds array from the given Dinos map
 func NewSpeeds(d Dinos) Speeds {
@@ -48,11 +49,13 @@ type Dino struct {
 
 // Speed returns the speed of the dino. Used by the sort to determine the fastest
 // dino.
-func (d Dino) Speed() float64 {
+func (d *Dino) Speed() float64 {
 	return math.Log(float64(d.StrideLength)*float64(d.LegLength)) * 9.8
 }
 
+// ReadFile reads a file.
 func ReadFile(f *os.File, d Dinos, wantBipeds bool) (Dinos, error) {
+	log.Printf("reading file %s", f.Name())
 	r := csv.NewReader(f)
 	input, err := r.ReadAll()
 	if err != nil {
@@ -67,61 +70,62 @@ func ReadFile(f *os.File, d Dinos, wantBipeds bool) (Dinos, error) {
 			} else {
 				isFile1 = false
 			}
+			continue
 		}
 		if isFile1 {
-			if val, ok := d[record[0]]; !ok {
-				stridelen, err := strconv.Atoi(record[1])
-				if err != nil {
-					return nil, fmt.Errorf("unable to convert string to int: %s", err)
+			if record[2] == "Biped" && wantBipeds {
+				if val, ok := d[record[0]]; !ok {
+					stridelen, err := strconv.Atoi(record[1])
+					if err != nil {
+						return nil, fmt.Errorf("unable to convert string to int: %s", err)
+					}
+					newDino := &Dino{Name: record[0], StrideLength: stridelen}
+					d[record[0]] = newDino
+					log.Printf("added StrideLength %d to Dino", stridelen)
+				} else {
+					stridelen, err := strconv.Atoi(record[1])
+					if err != nil {
+						return nil, fmt.Errorf("unable to convert string to int: %s", err)
+					}
+					val.StrideLength = stridelen
+					log.Printf("added StrideLength %d to Dino", stridelen)
 				}
-				newDino := Dino{Name: record[0], StrideLength: stridelen}
-				d[record[0]] = newDino
 			} else {
-				stridelen, err := strconv.Atoi(record[1])
-				if err != nil {
-					return nil, fmt.Errorf("unable to convert string to int: %s", err)
+				if val, ok := d[record[0]]; !ok {
+					stridelen, err := strconv.Atoi(record[1])
+					if err != nil {
+						return nil, fmt.Errorf("unable to convert string to int: %s", err)
+					}
+					newDino := &Dino{Name: record[0], StrideLength: stridelen}
+					d[record[0]] = newDino
+					log.Printf("added StrideLength %d to Dino", stridelen)
+				} else {
+					stridelen, err := strconv.Atoi(record[1])
+					if err != nil {
+						return nil, fmt.Errorf("unable to convert string to int: %s", err)
+					}
+					val.StrideLength = stridelen
+					log.Printf("added StrideLength %d to Dino", stridelen)
 				}
-				val.StrideLength = stridelen
 			}
 		} else {
-			if d[record[2]].Name == "Biped" && wantBipeds {
-				if val, ok := d[record[0]]; !ok {
-					leglen, err := strconv.Atoi(record[1])
-					if err != nil {
-						return nil, fmt.Errorf("unable to convert string to int: %s", err)
-					}
-					newDino := Dino{Name: record[0], LegLength: leglen}
-					d[record[0]] = newDino
-				} else {
-					leglen, err := strconv.Atoi(record[1])
-					if err != nil {
-						return nil, fmt.Errorf("unable to convert string to int: %s", err)
-					}
-					val.LegLength = leglen
+			if val, ok := d[record[0]]; ok {
+				leglen, err := strconv.Atoi(record[1])
+				if err != nil {
+					return nil, fmt.Errorf("unable to convert string to int: %s", err)
 				}
-			} else if d[record[2]].Name == "Quadraped" && !wantBipeds {
-				if val, ok := d[record[0]]; !ok {
-					leglen, err := strconv.Atoi(record[1])
-					if err != nil {
-						return nil, fmt.Errorf("unable to convert string to int: %s", err)
-					}
-					newDino := Dino{Name: record[0], LegLength: leglen}
-					d[record[0]] = newDino
-				} else {
-					leglen, err := strconv.Atoi(record[1])
-					if err != nil {
-						return nil, fmt.Errorf("unable to convert string to int: %s", err)
-					}
-					val.LegLength = leglen
-				}
+				val.LegLength = leglen
+				log.Printf("added LegLength %d to Dino", leglen)
 			}
 		}
 	}
 	return d, nil
 }
 
+// PrintDinos prints the dinos that exist in the given Speeds array.
 func PrintDinos(d Speeds) {
 	for _, dino := range d {
-		fmt.Printf("%s\n", dino.Name)
+		speed := dino.Speed()
+		fmt.Printf("%s %v %v %v\n", dino.Name, dino.LegLength, dino.StrideLength, speed)
 	}
 }
