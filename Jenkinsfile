@@ -1,11 +1,11 @@
 pipeline {
-  agent any
+    agent any
   
-  tools {
-    go 'Go 1.8'
-  }
-  stages {
-    stage ('Initialize') {
+    tools {
+        go 'Go 1.8'
+    }
+    stages {
+        stage ('Initialize') {
             steps {
                 sh '''
                     echo "PATH = ${PATH}"
@@ -14,12 +14,12 @@ pipeline {
                 ''' 
             }
         }
-    stage('Run tests') {
-      steps {
-        sh '''#! /bin/bash
+        stage('Run tests') {
+            steps {
+                sh '''#! /bin/bash
 
 go test ./...'''
-      }
+            }
+        }
     }
-  }
 }
