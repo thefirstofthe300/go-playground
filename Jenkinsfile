@@ -21,16 +21,6 @@ go test $(go list ./... | grep -v /vendor/)
 '''
       }
     }
-    stage('Build') {
-      steps {
-        sh 'go build'
-      }
-    }
-    stage('Deploy') {
-      steps {
-        echo 'Deploying'
-      }
-    }
   }
 }
 
